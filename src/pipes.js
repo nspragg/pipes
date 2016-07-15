@@ -2,6 +2,7 @@
 
 import LineStream from 'byline';
 import FilterStream from './FilterStream';
+import StringStream from './StringStream';
 import zlib from 'zlib';
 
 class Pipeline {
@@ -26,13 +27,17 @@ class Pipeline {
   }
 
   grep(pattern) {
-    const filterStream = new FilterStream(pattern);
-    this._streamFilters.push(filterStream);
+    this._streamFilters.push(new FilterStream(pattern));
     return this;
   }
 
   zcat() {
     this._isCompressed = true;
+    return this;
+  }
+
+  strings() {
+    this._streamFilters.push(new StringStream());
     return this;
   }
 

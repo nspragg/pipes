@@ -71,6 +71,21 @@ _.(file1)
   });
 ```
 
+#### Searching binary files
+
+Find all ascii text match `mypattern`:
+
+```js
+const binaryFile = fs.createReadStream('/tmp/myFile1.txt.gz');
+
+_.(binaryFile)
+  .strings()
+  .grep(/mypattern/)
+  .run((err, data) => {
+    console.log(data);
+  });
+```
+
 ## API
 
 ### Static methods

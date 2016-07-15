@@ -5,6 +5,7 @@ const assert = require('assert');
 const fs = require('fs');
 
 const LORUM_IP_SUM = __dirname + '/fixtures/loremIpSum.txt';
+const BINARY_FILE = __dirname + '/fixtures/binaryFile';
 const LORUM_IP_SUM_GZ = __dirname + '/fixtures/loremIpSum2.txt.gz';
 const COMPRESSED_FILE = __dirname + '/fixtures/compressed.txt.gz';
 
@@ -49,6 +50,20 @@ describe('pipes', function () {
     _(compressedStream)
       .zcat()
       .grep(/Curabitur/)
+      .run((err, data) => {
+        assert.ifError(err);
+        assert.deepEqual(data, expected);
+        done();
+      });
+  });
+
+  it('returns lines matching a given pattern from a binary file', (done) => {
+    const expected = ['xBro'];
+
+    const binaryFstream = fs.createReadStream(BINARY_FILE);
+    _(binaryFstream)
+      .strings()
+      .grep(/xBro/)
       .run((err, data) => {
         assert.ifError(err);
         assert.deepEqual(data, expected);

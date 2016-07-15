@@ -4,14 +4,15 @@ const _ = require('../src/pipes');
 const assert = require('assert');
 const fs = require('fs');
 
-const FILE = __dirname + '/fixtures/loremIpSum.txt';
+const LORUM_IP_SUM = __dirname + '/fixtures/loremIpSum.txt';
+const LORUM_IP_SUM_GZ = __dirname + '/fixtures/loremIpSum2.txt.gz';
 const COMPRESSED_FILE = __dirname + '/fixtures/compressed.txt.gz';
 
 describe('pipes', function () {
   let fstream = null;
 
   beforeEach(() => {
-    fstream = fs.createReadStream(FILE, {
+    fstream = fs.createReadStream(LORUM_IP_SUM, {
       encoding: 'utf8'
     });
   });
@@ -34,6 +35,20 @@ describe('pipes', function () {
     const compressedStream = fs.createReadStream(COMPRESSED_FILE);
     _(compressedStream)
       .zcat()
+      .run((err, data) => {
+        assert.ifError(err);
+        assert.deepEqual(data, expected);
+        done();
+      });
+  });
+
+  it('returns matching from a gzipped file', (done) => {
+    const expected = ['Curabitur vel purus purus. Vestibulum pretium libero eu feugiat porttitor. '];
+
+    const compressedStream = fs.createReadStream(LORUM_IP_SUM_GZ);
+    _(compressedStream)
+      .zcat()
+      .grep(/Curabitur/)
       .run((err, data) => {
         assert.ifError(err);
         assert.deepEqual(data, expected);

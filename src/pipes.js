@@ -1,32 +1,55 @@
 'use strict';
 
-const LineStream = require('byline').LineStream;
-const FilterStream = require('./FilterStream');
+import LineStream from 'byline';
+import FilterStream from './FilterStream';
+import zlib from 'zlib';
 
 class Pipeline {
-    constructor(stream) {
-        const lineStream = new LineStream();
-        this._stream = stream.pipe(lineStream);
+  constructor(stream) {
+    this._sourceStream = stream;
+    this._streamFilters = [];
+  }
+
+  _createPipeline(sourceStream) {
+    let pipeline = sourceStream;
+    if (this._isCompressed) {
+      pipeline = pipeline.pipe(zlib.createGunzip());
     }
 
-    grep(pattern) {
-        const filterStream = new FilterStream(pattern);
-        this._stream = this._stream.pipe(filterStream);
-        return this;
-    }
+    pipeline = pipeline.pipe(new LineStream());
 
-    run(cb) {
-        this._stream.on('readable', () => {
-            const output = [];
-            let data;
-            while (null !== (data = this._stream.read())) {
-                output.push(String(data))
-            }
-            cb(null, output);
-        })
-    }
+    this._streamFilters.forEach((filterStream) => {
+      pipeline = pipeline.pipe(filterStream);
+    });
+
+    return pipeline;
+  }
+
+  grep(pattern) {
+    const filterStream = new FilterStream(pattern);
+    this._streamFilters.push(filterStream);
+    return this;
+  }
+
+  zcat() {
+    this._isCompressed = true;
+    return this;
+  }
+
+  run(cb) {
+    const pipeline = this._createPipeline(this._sourceStream);
+
+    pipeline.on('readable', () => {
+      const output = [];
+      let data;
+      while (null !== (data = pipeline.read())) {
+        output.push(String(data))
+      }
+      cb(null, output);
+    })
+  }
 }
 
-module.exports = function(stream) {
-    return new Pipeline(stream);
+module.exports = function (stream) {
+  return new Pipeline(stream);
 };

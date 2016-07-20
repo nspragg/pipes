@@ -3,6 +3,7 @@
 import LineStream from 'byline';
 import FilterStream from './FilterStream';
 import StringStream from './StringStream';
+import LimitStream from './LimitStream';
 import zlib from 'zlib';
 
 class Pipeline {
@@ -38,6 +39,11 @@ class Pipeline {
 
   strings() {
     this._streamFilters.push(new StringStream());
+    return this;
+  }
+
+  head(n) {
+    this._streamFilters.push(new LimitStream(n));
     return this;
   }
 

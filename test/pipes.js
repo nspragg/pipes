@@ -71,11 +71,12 @@ describe('pipes', function () {
       });
   });
 
-  it('returns the first n lines', () => {
-    const expected = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus purus sem, rhoncus eu ornare ut, faucibus id ante.',
-                      'Nulla tincidunt tortor est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.'];
+  it('returns the first n lines', (done) => {
+    const expected = [
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus purus sem, rhoncus eu ornare ut, faucibus id ante.',
+      'Nulla tincidunt tortor est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.'
+    ];
 
-    const fstream = fs.createReadStream(LORUM_IP_SUM);
     _(fstream)
       .head(2)
       .run((err, data) => {

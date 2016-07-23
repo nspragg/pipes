@@ -1,5 +1,3 @@
-'use strict';
-
 import LineStream from 'byline';
 import FilterStream from './FilterStream';
 import StringStream from './StringStream';
@@ -50,14 +48,17 @@ class Pipeline {
   run(cb) {
     const pipeline = this._createPipeline(this._sourceStream);
 
+    const output = [];
     pipeline.on('readable', () => {
-      const output = [];
       let data;
       while (null !== (data = pipeline.read())) {
-        output.push(String(data))
+        output.push(String(data));
       }
+    });
+
+    pipeline.on('end', () => {
       cb(null, output);
-    })
+    });
   }
 }
 

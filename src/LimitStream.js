@@ -15,7 +15,6 @@ class LimitStream extends Transform {
     if (this._current <= this._limit) {
       this.push(data);
     }
-    // TODO: terminate the stream. No point of continuing. 
     cb();
   }
 }

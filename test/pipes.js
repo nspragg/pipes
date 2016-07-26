@@ -3,11 +3,18 @@
 const _ = require('../src/pipes');
 const assert = require('assert');
 const fs = require('fs');
+const sinon = require('sinon');
 
 const LORUM_IP_SUM = __dirname + '/fixtures/loremIpSum.txt';
 const BINARY_FILE = __dirname + '/fixtures/binaryFile';
 const LORUM_IP_SUM_GZ = __dirname + '/fixtures/loremIpSum2.txt.gz';
 const COMPRESSED_FILE = __dirname + '/fixtures/compressed.txt.gz';
+const URL = 'http://some.api.co.uk/feed';
+
+const client = require('flashheart').createClient({
+  name: 'pipes',
+  logger: console
+});
 
 describe('pipes', function () {
   let fstream = null;
@@ -19,7 +26,7 @@ describe('pipes', function () {
   });
 
   describe('_.fromFile()', () => {
-    it.only('creates a file stream from a fiven file', (done) => {
+    it('creates a file stream from a fiven file', (done) => {
       _.fromFile(LORUM_IP_SUM)
         .run((err, lines) => {
           assert.ifError(err);
@@ -29,8 +36,27 @@ describe('pipes', function () {
     });
   });
 
-  describe('_.from`Request()', () => {
+  describe('_.fromRequest()', () => {
+    beforeEach(() => {
+      sinon.stub(client, 'get').withArgs(URL).yields(null, {
+        a: 1,
+        b: 2,
+        c: 3
+      });
+    });
 
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it.skip('creates a stream from the response body of a given url', (done) => {
+      _.fromRequest(URL)
+        .run((err, lines) => {
+          assert.ifError(err);
+          assert.equal(lines.length, 16);
+          done();
+        });
+    });
   });
 
   it('returns a matching line for a given pattern', (done) => {

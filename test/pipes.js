@@ -127,12 +127,18 @@ describe('pipes', function () {
       });
   });
 
-  it.skip('concatenates files', () => {
-    _(fstream)
-      .cat(LORUM_IP_SUM)
-      .run((err, data) => {
-        assert.ifError(err);
-        assert.equal(data.length, 32);
-      });
+  describe('.cat', () => {
+    it('concatenates stream with a file', (done) => {
+      _(fstream)
+        .cat(LORUM_IP_SUM)
+        .run((err, data) => {
+          assert.ifError(err);
+          assert.equal(data.length, 32);
+          done();
+        });
+    });
+
+    it('supports var args for concatenating multiple files');
+    it('passes through data when not given any args');
   });
 });

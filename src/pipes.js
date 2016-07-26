@@ -3,6 +3,8 @@ import LineStream from 'byline';
 import FilterStream from './FilterStream';
 import StringStream from './StringStream';
 import LimitStream from './LimitStream';
+import CatStream from './ConcatStream';
+
 import zlib from 'zlib';
 
 class Pipeline {
@@ -33,6 +35,11 @@ class Pipeline {
 
   zcat() {
     this._isCompressed = true;
+    return this;
+  }
+
+  cat(file) {
+    this._streamFilters.push(new CatStream(file));
     return this;
   }
 

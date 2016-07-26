@@ -126,4 +126,13 @@ describe('pipes', function () {
         done();
       });
   });
+
+  it.skip('concatenates files', () => {
+    _(fstream)
+      .cat(LORUM_IP_SUM)
+      .run((err, data) => {
+        assert.ifError(err);
+        assert.equal(data.length, 32);
+      });
+  });
 });

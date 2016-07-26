@@ -117,6 +117,7 @@ Returns a Pipeline.
 ### Pipeline Instance methods
 
 ### `.cat(files...) -> Pipeline`
+Concatenate files
 
 ##### Parameters
 * One or more files. Arrays will be unpacked.
@@ -125,6 +126,7 @@ Returns a Pipeline.
 * Returns a Pipeline
 
 ### `.zcat(files...) -> Pipeline`
+Same as `.cat` but for gzipped files
 
 ##### Parameters
 * One or more gzipped files. Arrays will be unpacked.
@@ -133,9 +135,19 @@ Returns a Pipeline.
 * Returns a Pipeline
 
 ### `.grep(pattern) -> Pipeline`
+Returns matching lines for a given pattern
 
 ##### Parameters
 * Accepts a String or regex
+
+##### Returns
+* Returns a Pipeline
+
+### `.strings() -> Pipeline`
+
+Extracts ASCII text from binary data
+##### Parameters
+* None
 
 ##### Returns
 * Returns a Pipeline

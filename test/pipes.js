@@ -18,6 +18,21 @@ describe('pipes', function () {
     });
   });
 
+  describe('_.fromFile()', () => {
+    it.only('creates a file stream from a fiven file', (done) => {
+      _.fromFile(LORUM_IP_SUM)
+        .run((err, lines) => {
+          assert.ifError(err);
+          assert.equal(lines.length, 16);
+          done();
+        });
+    });
+  });
+
+  describe('_.from`Request()', () => {
+
+  });
+
   it('returns a matching line for a given pattern', (done) => {
     const expected = ['Curabitur vel purus purus. Vestibulum pretium libero eu feugiat porttitor. '];
 

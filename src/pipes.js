@@ -1,3 +1,4 @@
+import fs from 'fs';
 import LineStream from 'byline';
 import FilterStream from './FilterStream';
 import StringStream from './StringStream';
@@ -64,4 +65,8 @@ class Pipeline {
 
 module.exports = function (stream) {
   return new Pipeline(stream);
+};
+
+module.exports.fromFile = function (file) {
+  return new Pipeline(fs.createReadStream(file));
 };

@@ -4,7 +4,7 @@ import fs from 'fs';
 const Transform = require('stream').Transform;
 import LineStream from 'byline';
 
-class CatSream extends Transform {
+class CatStream extends Transform {
   constructor(file) {
     super();
     this._fstream = fs.createReadStream(file).pipe(new LineStream());
@@ -33,4 +33,4 @@ class CatSream extends Transform {
   }
 }
 
-module.exports = CatSream;
+module.exports = CatStream;

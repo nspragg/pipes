@@ -38,8 +38,8 @@ class Pipeline {
     return this;
   }
 
-  cat(file) {
-    this._streamFilters.push(new CatStream(file));
+  cat() {
+    this._streamFilters.push(new CatStream(arguments));
     return this;
   }
 

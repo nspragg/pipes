@@ -1,13 +1,26 @@
 'use strict';
 
+import async from 'async';
+
+import {
+  toArray
+} from './arrays';
+
 import fs from 'fs';
-const Transform = require('stream').Transform;
+import {
+  Transform
+} from 'stream';
+
 import LineStream from 'byline';
 
-class CatSream extends Transform {
-  constructor(file) {
+function createTextStream(file) {
+  return fs.createReadStream(file).pipe(new LineStream());
+}
+
+class CatStream extends Transform {
+  constructor(files) {
     super();
-    this._fstream = fs.createReadStream(file).pipe(new LineStream());
+    this._fstreams = toArray(files).map(createTextStream);
     this._buffer = [];
   }
 
@@ -16,21 +29,33 @@ class CatSream extends Transform {
     next();
   }
 
-  _flush(next) {
-    this._fstream.on('readable', () => {
+  _registerEvents(fstream, cb) {
+    fstream.on('readable', () => {
       let chunk;
-      while ((chunk = this._fstream.read()) != null) {
+      while ((chunk = fstream.read()) != null) {
         this._buffer.push(String(chunk));
       }
     });
 
-    this._fstream.on('end', () => {
-      this._buffer.forEach((data) => {
-        this.push(data);
-      });
+    fstream.on('end', cb);
+  }
+
+  _flushInternalBuffer() {
+    this._buffer.forEach((data) => {
+      this.push(data);
+    });
+  }
+
+  _flush(next) {
+    async.eachSeries(this._fstreams, (fstream, cb) => {
+      this._registerEvents(fstream, cb);
+    }, (err) => {
+      if (err) return next(err);
+
+      this._flushInternalBuffer();
       next();
     });
   }
 }
 
-module.exports = CatSream;
+module.exports = CatStream;

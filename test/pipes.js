@@ -138,7 +138,16 @@ describe('pipes', function () {
         });
     });
 
-    it('supports var args for concatenating multiple files');
+    it('concatenates stream with > 1 file', (done) => {
+      _(fstream)
+        .cat(LORUM_IP_SUM, LORUM_IP_SUM)
+        .run((err, data) => {
+          assert.ifError(err);
+          assert.equal(data.length, 48);
+          done();
+        });
+    });
+
     it('passes through data when not given any args');
   });
 });

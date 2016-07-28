@@ -1,5 +1,3 @@
-'use strict';
-
 import async from 'async';
 
 import {
@@ -29,10 +27,10 @@ class CatStream extends Transform {
     next();
   }
 
-  _registerEvents(fstream, cb) {
+  _consume(fstream, cb) {
     fstream.on('readable', () => {
       let chunk;
-      while ((chunk = fstream.read()) != null) {
+      while ((chunk = fstream.read()) !== null) {
         this._buffer.push(String(chunk));
       }
     });
@@ -40,7 +38,7 @@ class CatStream extends Transform {
     fstream.on('end', cb);
   }
 
-  _flushInternalBuffer() {
+  _flushBuffer() {
     this._buffer.forEach((data) => {
       this.push(data);
     });
@@ -48,11 +46,11 @@ class CatStream extends Transform {
 
   _flush(next) {
     async.eachSeries(this._fstreams, (fstream, cb) => {
-      this._registerEvents(fstream, cb);
+      this._consume(fstream, cb);
     }, (err) => {
       if (err) return next(err);
 
-      this._flushInternalBuffer();
+      this._flushBuffer();
       next();
     });
   }

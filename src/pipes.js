@@ -99,6 +99,9 @@ module.exports.fromFile = function (file) {
 };
 
 module.exports.fromRequest = function (url) {
-  const httpResponseStream = request.get(url).pipe(new ThroughStream());
+  const httpResponseStream = request
+    .get(url)
+    .pipe(new ThroughStream());
+
   return new Pipeline(httpResponseStream).keepNewlines();
 };

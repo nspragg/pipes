@@ -11,14 +11,17 @@ import {
 
 import LineStream from 'byline';
 
-function createTextStream(file) {
-  return fs.createReadStream(file).pipe(new LineStream());
+function createTextStream(file, cb) {
+  const fstream = fs.createReadStream(file);
+  fstream.on('error', cb);
+
+  return fstream.pipe(new LineStream());
 }
 
 class CatStream extends Transform {
   constructor(files) {
     super();
-    this._fstreams = toArray(files).map(createTextStream);
+    this._files = toArray(files);
     this._buffer = [];
   }
 
@@ -28,14 +31,14 @@ class CatStream extends Transform {
   }
 
   _consume(fstream, cb) {
+    fstream.on('end', cb);
+
     fstream.on('readable', () => {
       let chunk;
       while ((chunk = fstream.read()) !== null) {
         this._buffer.push(String(chunk));
       }
     });
-
-    fstream.on('end', cb);
   }
 
   _flushBuffer() {
@@ -45,7 +48,11 @@ class CatStream extends Transform {
   }
 
   _flush(next) {
-    async.eachSeries(this._fstreams, (fstream, cb) => {
+    const fstreams = this._files.map((fstream) => {
+      return createTextStream(fstream, next);
+    });
+
+    async.eachSeries(fstreams, (fstream, cb) => {
       this._consume(fstream, cb);
     }, (err) => {
       if (err) return next(err);

@@ -64,6 +64,10 @@ class Pipeline {
       }
     });
 
+    pipeline.on('error', (err) => {
+      cb(err);
+    });
+
     pipeline.on('end', () => {
       cb(null, output);
     });

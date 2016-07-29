@@ -25,6 +25,7 @@ npm install --save pipes
 * Supports compressed files
 * Supports custom filtering
 * Handles large files
+* Simple interface
 * Supports promises and callbacks
 
 ## Usage

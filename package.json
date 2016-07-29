@@ -76,7 +76,7 @@
   "dependencies": {
     "async": "^2.0.1",
     "byline": "^4.2.1",
-    "flashheart": "^2.3.0",
-    "moment": "^2.14.1"
+    "moment": "^2.14.1",
+    "request": "^2.74.0"
   }
 }

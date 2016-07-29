@@ -3,6 +3,7 @@
 const _ = require('../src/pipes');
 const assert = require('assert');
 const fs = require('fs');
+const request = require('request');
 const sinon = require('sinon');
 
 const LORUM_IP_SUM = __dirname + '/fixtures/loremIpSum.txt';
@@ -10,13 +11,9 @@ const BINARY_FILE = __dirname + '/fixtures/binaryFile';
 const LORUM_IP_SUM_GZ = __dirname + '/fixtures/loremIpSum2.txt.gz';
 const COMPRESSED_FILE = __dirname + '/fixtures/compressed.txt.gz';
 const URL = 'http://some.api.co.uk/feed';
+const API_RESPONSE = require('./fixtures/apiResponse');
 
-const client = require('flashheart').createClient({
-  name: 'pipes',
-  logger: console
-});
-
-describe('pipes', function () {
+describe('pipes', () => {
   let fstream = null;
 
   beforeEach(() => {
@@ -25,32 +22,9 @@ describe('pipes', function () {
     });
   });
 
-  describe('_.fromFile()', () => {
+  describe('.fromFile()', () => {
     it('creates a file stream from a fiven file', (done) => {
       _.fromFile(LORUM_IP_SUM)
-        .run((err, lines) => {
-          assert.ifError(err);
-          assert.equal(lines.length, 16);
-          done();
-        });
-    });
-  });
-
-  describe('_.fromRequest()', () => {
-    beforeEach(() => {
-      sinon.stub(client, 'get').withArgs(URL).yields(null, {
-        a: 1,
-        b: 2,
-        c: 3
-      });
-    });
-
-    afterEach(() => {
-      sinon.restore();
-    });
-
-    it.skip('creates a stream from the response body of a given url', (done) => {
-      _.fromRequest(URL)
         .run((err, lines) => {
           assert.ifError(err);
           assert.equal(lines.length, 16);
@@ -148,6 +122,23 @@ describe('pipes', function () {
         });
     });
 
-    it('passes through data when not given any args');
+    it('passes through data when not given any args', (done) => {
+      _(fstream)
+        .cat()
+        .run((err, data) => {
+          assert.ifError(err);
+          assert.equal(data.length, 16);
+          done();
+        });
+    });
+
+    it('returns an error when cat fails', (done) => {
+      _(fstream)
+        .cat('bad file')
+        .run((err) => {
+          assert.ok(err);
+          done();
+        });
+    });
   });
 });

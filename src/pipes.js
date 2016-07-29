@@ -4,6 +4,9 @@ import FilterStream from './FilterStream';
 import StringStream from './StringStream';
 import LimitStream from './LimitStream';
 import CatStream from './ConcatStream';
+import ThroughStream from './throughStream';
+
+const request = require('request');
 
 import zlib from 'zlib';
 
@@ -11,6 +14,7 @@ class Pipeline {
   constructor(stream) {
     this._sourceStream = stream;
     this._streamFilters = [];
+    this._newlines = true;
   }
 
   _createPipeline(sourceStream) {
@@ -19,7 +23,9 @@ class Pipeline {
       pipeline = pipeline.pipe(zlib.createGunzip());
     }
 
-    pipeline = pipeline.pipe(new LineStream());
+    if (this._newlines) {
+      pipeline = pipeline.pipe(new LineStream());
+    }
 
     this._streamFilters.forEach((filterStream) => {
       pipeline = pipeline.pipe(filterStream);
@@ -53,6 +59,16 @@ class Pipeline {
     return this;
   }
 
+  newlines() {
+    this._newlines = true;
+    return this;
+  }
+
+  keepNewlines() {
+    this._newlines = false;
+    return this;
+  }
+
   run(cb) {
     const pipeline = this._createPipeline(this._sourceStream);
 
@@ -80,4 +96,9 @@ module.exports = function (stream) {
 
 module.exports.fromFile = function (file) {
   return new Pipeline(fs.createReadStream(file));
+};
+
+module.exports.fromRequest = function (url) {
+  const httpResponseStream = request.get(url).pipe(new ThroughStream());
+  return new Pipeline(httpResponseStream).keepNewlines();
 };

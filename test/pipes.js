@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('../src/pipes');
 const assert = require('assert');
 const fs = require('fs');
@@ -10,8 +8,20 @@ const LORUM_IP_SUM = __dirname + '/fixtures/loremIpSum.txt';
 const BINARY_FILE = __dirname + '/fixtures/binaryFile';
 const LORUM_IP_SUM_GZ = __dirname + '/fixtures/loremIpSum2.txt.gz';
 const COMPRESSED_FILE = __dirname + '/fixtures/compressed.txt.gz';
+const API_RESPONSE = __dirname + '/fixtures/apiResponse.json';
 const URL = 'http://some.api.co.uk/feed';
-const API_RESPONSE = require('./fixtures/apiResponse');
+
+class RequestStub {
+  constructor(file) {
+    this._file = file;
+  }
+
+  pipe(stream) {
+    return fs.createReadStream(this._file, {
+      encoding: 'utf8'
+    }).pipe(stream);
+  }
+}
 
 describe('pipes', () => {
   let fstream = null;
@@ -22,12 +32,32 @@ describe('pipes', () => {
     });
   });
 
-  describe('.fromFile()', () => {
+  describe('.fromFile(file)', () => {
     it('creates a file stream from a fiven file', (done) => {
       _.fromFile(LORUM_IP_SUM)
         .run((err, lines) => {
           assert.ifError(err);
           assert.equal(lines.length, 16);
+          done();
+        });
+    });
+  });
+
+  describe('.fromRequest(url)', () => {
+    beforeEach(() => {
+      sinon.stub(request, 'get').returns(new RequestStub(API_RESPONSE));
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it('creates a stream from the response body of a given url', (done) => {
+      _.fromRequest(URL)
+        .run((err, response) => {
+          assert.ifError(err);
+          const result = JSON.parse(response[0]);
+          assert.equal(result.id, 'someid');
           done();
         });
     });

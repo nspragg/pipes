@@ -10,11 +10,24 @@ const request = require('request');
 
 import zlib from 'zlib';
 
+function toArray(stream, output) {
+  return () => {
+    let data;
+    while (null !== (data = stream.read())) {
+      output.push(String(data));
+    }
+  };
+}
+
+function join(output) {
+  return output.join('');
+}
+
 class Pipeline {
   constructor(stream) {
     this._sourceStream = stream;
     this._streamFilters = [];
-    this._newlines = true;
+    this._readAsLines = true;
   }
 
   _createPipeline(sourceStream) {
@@ -23,7 +36,7 @@ class Pipeline {
       pipeline = pipeline.pipe(zlib.createGunzip());
     }
 
-    if (this._newlines) {
+    if (this._readAsLines) {
       pipeline = pipeline.pipe(new LineStream());
     }
 
@@ -59,33 +72,35 @@ class Pipeline {
     return this;
   }
 
-  newlines() {
-    this._newlines = true;
+  readAsLines() {
+    this._readAsLines = true;
     return this;
   }
 
-  keepNewlines() {
-    this._newlines = false;
+  ignoreNewlines() {
+    this._readAsLines = false;
+    return this;
+  }
+
+  resultHandler(fn) {
+    this._resultHandler = fn;
     return this;
   }
 
   run(cb) {
     const pipeline = this._createPipeline(this._sourceStream);
+    const buffer = [];
 
-    const output = [];
-    pipeline.on('readable', () => {
-      let data;
-      while (null !== (data = pipeline.read())) {
-        output.push(String(data));
-      }
-    });
+    pipeline.on('readable', toArray(pipeline, buffer));
 
-    pipeline.on('error', (err) => {
-      cb(err);
-    });
+    pipeline.on('error', cb);
 
     pipeline.on('end', () => {
-      cb(null, output);
+      if (this._resultHandler) {
+        return cb(null, this._resultHandler(buffer));
+      }
+
+      cb(null, buffer);
     });
   }
 }
@@ -103,5 +118,7 @@ module.exports.fromRequest = function (url) {
     .get(url)
     .pipe(new ThroughStream());
 
-  return new Pipeline(httpResponseStream).keepNewlines();
+  return new Pipeline(httpResponseStream)
+    .ignoreNewlines()
+    .resultHandler(join);
 };

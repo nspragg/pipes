@@ -8,7 +8,7 @@ const LORUM_IP_SUM = __dirname + '/fixtures/loremIpSum.txt';
 const BINARY_FILE = __dirname + '/fixtures/binaryFile';
 const LORUM_IP_SUM_GZ = __dirname + '/fixtures/loremIpSum2.txt.gz';
 const COMPRESSED_FILE = __dirname + '/fixtures/compressed.txt.gz';
-const API_RESPONSE = __dirname + '/fixtures/apiResponse.json';
+const API_RESPONSE = __dirname + '/fixtures/simpleResponse.txt';
 const URL = 'http://some.api.co.uk/feed';
 
 class RequestStub {
@@ -56,8 +56,7 @@ describe('pipes', () => {
       _.fromRequest(URL)
         .run((err, response) => {
           assert.ifError(err);
-          const result = JSON.parse(response[0]);
-          assert.equal(result.id, 'someid');
+          assert.equal(response, 'status OK\n');
           done();
         });
     });

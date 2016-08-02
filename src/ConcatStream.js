@@ -45,6 +45,7 @@ class CatStream extends Transform {
     this._buffer.forEach((data) => {
       this.push(data);
     });
+    // this.push(this._buffer.join(''));
   }
 
   _flush(next) {

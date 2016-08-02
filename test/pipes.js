@@ -62,6 +62,33 @@ describe('pipes', () => {
     });
   });
 
+  describe('supports promises', () => {
+    const expected = ['Curabitur vel purus purus. Vestibulum pretium libero eu feugiat porttitor. '];
+
+    it('fulfills with an array of matching lines', () => {
+      const result = _(fstream)
+        .grep(/Curabitur/)
+        .run()
+        .catch((err) => {
+          assert.ifError(err);
+        });
+
+      return result
+        .then((data) => {
+          assert.deepEqual(data, expected);
+        });
+    });
+
+    it('fulfills with an error', () => {
+      return _(fstream)
+        .cat('bad file')
+        .run()
+        .catch((err) => {
+          assert.ok(err);
+        });
+    });
+  });
+
   it('returns a matching line for a given pattern', (done) => {
     const expected = ['Curabitur vel purus purus. Vestibulum pretium libero eu feugiat porttitor. '];
 

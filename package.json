@@ -38,7 +38,7 @@
     "eslint": "^3.0.0",
     "istanbul": "^0.4.4",
     "lodash": "^4.13.1",
-    "mocha": "^2.3.0",
+    "mocha": "^3.0.0",
     "sinon": "^1.17.4"
   },
   "eslintConfig": {
@@ -75,6 +75,7 @@
   },
   "dependencies": {
     "async": "^2.0.1",
+    "bluebird": "^3.4.1",
     "byline": "^4.2.1",
     "moment": "^2.14.1",
     "request": "^2.74.0"

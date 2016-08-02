@@ -5,18 +5,17 @@ import StringStream from './StringStream';
 import LimitStream from './LimitStream';
 import CatStream from './ConcatStream';
 import ThroughStream from './throughStream';
+import bluebird from 'bluebird';
 
 const request = require('request');
 
 import zlib from 'zlib';
 
 function toArray(stream, output) {
-  return () => {
-    let data;
-    while (null !== (data = stream.read())) {
-      output.push(String(data));
-    }
-  };
+  let data;
+  while (null !== (data = stream.read())) {
+    output.push(String(data));
+  }
 }
 
 function join(output) {
@@ -91,17 +90,23 @@ class Pipeline {
     const pipeline = this._createPipeline(this._sourceStream);
     const buffer = [];
 
-    pipeline.on('readable', toArray(pipeline, buffer));
-
-    pipeline.on('error', cb);
-
-    pipeline.on('end', () => {
-      if (this._resultHandler) {
-        return cb(null, this._resultHandler(buffer));
-      }
-
-      cb(null, buffer);
+    const pending = new bluebird((resolve, reject) => {
+      pipeline
+        .on('readable', (data) => {
+          toArray(pipeline, buffer);
+        })
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('end', () => {
+          if (this._resultHandler) {
+            return resolve(this._resultHandler(buffer));
+          }
+          resolve(buffer);
+        });
     });
+
+    return pending.asCallback(cb);
   }
 }
 

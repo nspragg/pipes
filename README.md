@@ -24,7 +24,6 @@ npm install --save pipes
 * Familiar features inspired and named after common Unix and Linux commands
 * Supports compressed files
 * Supports custom filtering
-* Handles large files
 * Simple interface
 * Supports promises and callbacks
 
@@ -38,7 +37,7 @@ const file = fs.createReadStream('/tmp/myFile.txt.gz');
 _.(file)
   .zcat()
   .grep(/myPattern/i)
-  .run((err, data) => {
+  .toArray((err, data) => {
     console.log(`found ${data}`);
   });
 ```
@@ -52,7 +51,7 @@ const file = fs.createReadStream('/tmp/myFile.txt.gz');
 
 _.(file)
   .grep(/myPattern/i)
-  .run((err, data) => {
+  .toArray((err, data) => {
     console.log(`found ${data}`);
   });
 ```
@@ -67,7 +66,7 @@ const file2 = fs.createReadStream('/tmp/myFile2.txt.gz');
 
 _.(file1)
   .cat(file2)
-  .run((err, data) => {
+  .toArray((err, data) => {
     console.log(data);
   });
 ```
@@ -82,7 +81,7 @@ const binaryFile = fs.createReadStream('/tmp/myFile1.txt.gz');
 _.(binaryFile)
   .strings()
   .grep(/mypattern/)
-  .run((err, data) => {
+  .toArray((err, data) => {
     console.log(data);
   });
 ```
@@ -147,6 +146,16 @@ Returns matching lines for a given pattern
 ### `.strings() -> Pipeline`
 
 Extracts ASCII text from binary data
+##### Parameters
+* None
+
+##### Returns
+* Returns a Pipeline
+
+### `.toArray() -> Promise`
+
+Returns a Promise. If the Promise fulfils, the fulfilment value is an array containing the stream's contents.
+
 ##### Parameters
 * None
 

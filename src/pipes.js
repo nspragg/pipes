@@ -51,7 +51,7 @@ class Pipeline {
 
     return new bluebird((resolve, reject) => {
       pipeline
-        .on('readable', (data) => {
+        .on('readable', () => {
           toArray(pipeline, buffer);
         })
         .on('error', (err) => {
@@ -101,13 +101,14 @@ class Pipeline {
     return this;
   }
 
-  resultHandler(fn) {
-    this._resultHandler = fn;
-    return this;
+  toArray(cb) {
+    return this._promisify(this._createPipeline(this._sourceStream)).asCallback(cb);
   }
 
-  run(cb) {
-    return this._promisify(this._createPipeline(this._sourceStream)).asCallback(cb);
+  toString(cb) {
+    this.toArray()
+      .then(join)
+      .asCallback(cb);
   }
 }
 
@@ -124,7 +125,5 @@ module.exports.fromRequest = function (url) {
     .get(url)
     .pipe(new ThroughStream());
 
-  return new Pipeline(httpResponseStream)
-    .ignoreNewlines()
-    .resultHandler(join);
+  return new Pipeline(httpResponseStream).ignoreNewlines();
 };

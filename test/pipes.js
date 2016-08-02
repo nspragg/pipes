@@ -35,7 +35,7 @@ describe('pipes', () => {
   describe('.fromFile(file)', () => {
     it('creates a file stream from a fiven file', (done) => {
       _.fromFile(LORUM_IP_SUM)
-        .run((err, lines) => {
+        .toArray((err, lines) => {
           assert.ifError(err);
           assert.equal(lines.length, 16);
           done();
@@ -54,7 +54,7 @@ describe('pipes', () => {
 
     it('creates a stream from the response body of a given url', (done) => {
       _.fromRequest(URL)
-        .run((err, response) => {
+        .toString((err, response) => {
           assert.ifError(err);
           assert.equal(response, 'status OK\n');
           done();
@@ -68,7 +68,7 @@ describe('pipes', () => {
     it('fulfills with an array of matching lines', () => {
       const result = _(fstream)
         .grep(/Curabitur/)
-        .run()
+        .toArray()
         .catch((err) => {
           assert.ifError(err);
         });
@@ -82,7 +82,7 @@ describe('pipes', () => {
     it('fulfills with an error', () => {
       return _(fstream)
         .cat('bad file')
-        .run()
+        .toArray()
         .catch((err) => {
           assert.ok(err);
         });
@@ -94,7 +94,7 @@ describe('pipes', () => {
 
     _(fstream)
       .grep(/Curabitur/)
-      .run((err, data) => {
+      .toArray((err, data) => {
         assert.ifError(err);
         assert.deepEqual(data, expected);
         done();
@@ -107,7 +107,7 @@ describe('pipes', () => {
     const compressedStream = fs.createReadStream(COMPRESSED_FILE);
     _(compressedStream)
       .zcat()
-      .run((err, data) => {
+      .toArray((err, data) => {
         assert.ifError(err);
         assert.deepEqual(data, expected);
         done();
@@ -121,7 +121,7 @@ describe('pipes', () => {
     _(compressedStream)
       .zcat()
       .grep(/Curabitur/)
-      .run((err, data) => {
+      .toArray((err, data) => {
         assert.ifError(err);
         assert.deepEqual(data, expected);
         done();
@@ -135,7 +135,7 @@ describe('pipes', () => {
     _(binaryFstream)
       .strings()
       .grep(/xBro/)
-      .run((err, data) => {
+      .toArray((err, data) => {
         assert.ifError(err);
         assert.deepEqual(data, expected);
         done();
@@ -150,7 +150,7 @@ describe('pipes', () => {
 
     _(fstream)
       .head(2)
-      .run((err, data) => {
+      .toArray((err, data) => {
         assert.ifError(err);
         assert.deepEqual(data, expected);
         done();
@@ -161,7 +161,7 @@ describe('pipes', () => {
     it('concatenates stream with a file', (done) => {
       _(fstream)
         .cat(LORUM_IP_SUM)
-        .run((err, data) => {
+        .toArray((err, data) => {
           assert.ifError(err);
           assert.equal(data.length, 32);
           done();
@@ -171,7 +171,7 @@ describe('pipes', () => {
     it('concatenates stream with > 1 file', (done) => {
       _(fstream)
         .cat(LORUM_IP_SUM, LORUM_IP_SUM)
-        .run((err, data) => {
+        .toArray((err, data) => {
           assert.ifError(err);
           assert.equal(data.length, 48);
           done();
@@ -181,7 +181,7 @@ describe('pipes', () => {
     it('passes through data when not given any args', (done) => {
       _(fstream)
         .cat()
-        .run((err, data) => {
+        .toArray((err, data) => {
           assert.ifError(err);
           assert.equal(data.length, 16);
           done();
@@ -191,7 +191,7 @@ describe('pipes', () => {
     it('returns an error when cat fails', (done) => {
       _(fstream)
         .cat('bad file')
-        .run((err) => {
+        .toArray((err) => {
           assert.ok(err);
           done();
         });

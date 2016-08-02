@@ -46,6 +46,26 @@ class Pipeline {
     return pipeline;
   }
 
+  _promisify(pipeline) {
+    const buffer = [];
+
+    return new bluebird((resolve, reject) => {
+      pipeline
+        .on('readable', (data) => {
+          toArray(pipeline, buffer);
+        })
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('end', () => {
+          if (this._resultHandler) {
+            return resolve(this._resultHandler(buffer));
+          }
+          resolve(buffer);
+        });
+    });
+  }
+
   grep(pattern) {
     this._streamFilters.push(new FilterStream(pattern));
     return this;
@@ -71,10 +91,10 @@ class Pipeline {
     return this;
   }
 
-  readAsLines() {
-    this._readAsLines = true;
-    return this;
-  }
+  // readAsLines() {
+  //   this._readAsLines = true;
+  //   return this;
+  // }
 
   ignoreNewlines() {
     this._readAsLines = false;
@@ -87,26 +107,7 @@ class Pipeline {
   }
 
   run(cb) {
-    const pipeline = this._createPipeline(this._sourceStream);
-    const buffer = [];
-
-    const pending = new bluebird((resolve, reject) => {
-      pipeline
-        .on('readable', (data) => {
-          toArray(pipeline, buffer);
-        })
-        .on('error', (err) => {
-          reject(err);
-        })
-        .on('end', () => {
-          if (this._resultHandler) {
-            return resolve(this._resultHandler(buffer));
-          }
-          resolve(buffer);
-        });
-    });
-
-    return pending.asCallback(cb);
+    return this._promisify(this._createPipeline(this._sourceStream)).asCallback(cb);
   }
 }
 

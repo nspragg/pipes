@@ -32,6 +32,7 @@ class CatStream extends Transform {
 
   _consume(fstream, cb) {
     fstream.on('end', cb);
+    fstream.on('error', cb);
 
     fstream.on('readable', () => {
       let chunk;
@@ -45,7 +46,6 @@ class CatStream extends Transform {
     this._buffer.forEach((data) => {
       this.push(data);
     });
-    // this.push(this._buffer.join(''));
   }
 
   _flush(next) {
@@ -55,9 +55,7 @@ class CatStream extends Transform {
 
     async.eachSeries(fstreams, (fstream, cb) => {
       this._consume(fstream, cb);
-    }, (err) => {
-      if (err) return next(err);
-
+    }, () => {
       this._flushBuffer();
       next();
     });

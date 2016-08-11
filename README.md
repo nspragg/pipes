@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/nspragg/pipes.svg)](https://travis-ci.org/nspragg/pipes) [![Coverage Status](https://coveralls.io/repos/github/nspragg/pipes/badge.svg?branch=master)](https://coveralls.io/github/nspragg/pipes?branch=master)
 
-> Treat Node streams like Unix style pipelines
+> [INACTIVE] - Treat Node streams like Unix style pipelines
 
 * [Installation](#installation)
 * [Features](#features)
